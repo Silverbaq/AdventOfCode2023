@@ -1,24 +1,45 @@
 import kotlin.math.pow
 
 fun main() {
-    fun part1(input: List<String>): Int {
-        var result = 0
-        input.forEach { line ->
-            val (left, right) = line.replace("  ", " ").split(":")[1].split("|")
-            val winningNumbers = right.trim().split(" ").map { it.toInt() }
-            val cards = left.trim().split(" ").map { it.toInt() }
+    class Card(val numbers: List<Int>, val winningNumbers: List<Int>)
 
-            result += 2.0.pow(winningNumbers.count { cards.contains(it) } - 1).toInt()
+    fun part1(cards: List<Card>): Int {
+        return cards.map { card ->
+            2.0.pow(card.winningNumbers.count { card.numbers.contains(it) } - 1).toInt()
+        }.sum()
+    }
+
+    fun part2(cards: List<Card>): Int {
+        val cardCounts = MutableList(cards.size) { 1 } // Initialize with 1 for each original card
+
+        for (i in cards.indices) {
+            val card = cards[i]
+            val matches = card.winningNumbers.count { card.numbers.contains(it) }
+            val copies = cardCounts[i] // Get the current number of copies for this card
+
+            for (j in 1..matches) {
+                if (i + j < cards.size) {
+                    cardCounts[i + j] += copies
+                }
+            }
         }
 
-        return result
+        return cardCounts.sum()
     }
 
-    fun part2(input: List<String>): Int {
-        return 0
+    fun parseInput(input: List<String>): List<Card> {
+        return input.map { line ->
+            val (left, right) = line.replace("  ", " ").split(":")[1].split("|")
+            val numbers = left.trim().split(" ").map { it.toInt() }
+            val winningNumbers = right.trim().split(" ").map { it.toInt() }
+
+            Card(numbers, winningNumbers)
+        }
     }
 
-    val input = readInputLines("day4")
+    val input = parseInput(readInputLines("day4"))
+
+    println(input)
     println(part1(input))
     println(part2(input))
 }
